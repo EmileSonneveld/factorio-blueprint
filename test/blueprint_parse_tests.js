@@ -407,6 +407,18 @@ describe('Blueprint Parsing', () => {
     });
   });
 
+  describe('locomotive with schedule', () => {
+    it('schedule should be readable', () => {
+      const input =
+        '0eNqFUdtqxCAQ/Zd5tov3S2C/ZFlKkpWtYDQYs3QJ/ns1aek+FOqDMp4bM7PB4Fc7JxcydBu4MYYFussGi7uH3re//JwtdOCynQBB6KdW+TjGKWb3sFAQuHCzn9CRgv4Vpt75FwktVwQ2ZJedPYL34vke1mmwqXr+FYlgjkuVxNByWjLmlfiEThJ+EoYpUSNictWsP2gYwRh9TE1QL3xiRmKleaVKqYSimBK+lwjuDef4OKLyuORcKcEMlrTiw4EzQ4lQnAlOFFGCGmqkbvp+x40+GPUhXDJJWfWpeGktL+OHva3+u+ff1lpNXvBjFz9NwKUN8+xSDG+z77O93lKcoVyb5T7n7mWfCB42LbuQasKVoUprLQ2hpXwBinSX+A==';
+      const bp = new Blueprint(input);
+      assert.equal(bp.schedules.length, 1);
+      assert.equal(bp.schedules[0].schedule.length, 1);
+      assert.equal(bp.schedules[0].schedule[0].station, '[item=iron-plate]drop');
+      const str = bp.encode();
+      assert.equal(util.decode[0](str).schedules, util.decode[0](input).schedules);
+    });
+  });
   describe('snapping', () => {
     it('should preserve snapping grid size', () => {
       // a simple loop of fast belts in a 3x3 space with relative snapping

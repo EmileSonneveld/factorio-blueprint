@@ -8,6 +8,7 @@ import entityData from './defaultentities';
 import { generateElectricalConnections } from './electrical-connections';
 import Entity from './entity';
 import Tile from './tile';
+import ScheduleWrapper from './schedule';
 import util from './util';
 
 export default class Blueprint {
@@ -16,6 +17,7 @@ export default class Blueprint {
   icons: string[];
   entities: Entity[];
   tiles: Tile[];
+  schedules: ScheduleWrapper[];
   entityPositionGrid: { [location: string]: Entity };
   tilePositionGrid: { [location: string]: Tile };
   version: number;
@@ -27,6 +29,7 @@ export default class Blueprint {
     this.icons = []; // Icons for Blueprint (up to 4)
     this.entities = []; // List of all entities in Blueprint
     this.tiles = []; // List of all tiles in Blueprint (such as stone path or concrete)
+    this.schedules = []
     this.entityPositionGrid = {}; // Object with tile keys in format "x,y" => entity
     this.tilePositionGrid = {};
     this.version = 281479273971713; // Factorio version 1.1.35
@@ -66,6 +69,7 @@ export default class Blueprint {
 
     if (!data.tiles) data.tiles = [];
     if (!data.entities) data.entities = [];
+    if (!data.schedules) data.schedules = [];
     if (!data.icons) data.icons = [];
 
     this.name = data.label;
@@ -86,6 +90,10 @@ export default class Blueprint {
 
     data.tiles.forEach((tile: any) => {
       this.createTile(tile.name, tile.position);
+    });
+
+    this.schedules = data.schedules.map((schedule: any) => {
+      return new ScheduleWrapper(schedule, this);
     });
 
     this.icons = [];
@@ -383,6 +391,11 @@ export default class Blueprint {
 
       return entData;
     });
+    const schedulesData = this.schedules.map((ent, i) => {
+      const data = ent.getData();
+      // TODO: link schedules to correct trains.
+      return data;
+    });
     const tileInfo = this.tiles.map((tile, i) => tile.getData());
     const iconData = this.icons
       .map((icon, i) => {
@@ -403,6 +416,7 @@ export default class Blueprint {
         icons: iconData,
         entities: this.entities.length ? entityInfo : undefined,
         tiles: this.tiles.length ? tileInfo : undefined,
+        schedules: schedulesData.length ? schedulesData : undefined,
         item: 'blueprint',
         version: this.version || 0,
         label: this.name,
