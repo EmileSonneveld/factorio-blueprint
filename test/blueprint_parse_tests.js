@@ -1,4 +1,5 @@
 const assert = require('assert');
+const fs = require("fs");
 const Blueprint = require('../dist/factorio-blueprint.min.js');
 const util = require('./util');
 const Victor = require('victor');
@@ -409,14 +410,26 @@ describe('Blueprint Parsing', () => {
 
   describe('locomotive with schedule', () => {
     it('schedule should be readable', () => {
-      const input =
-        '0eNqFUdtqxCAQ/Zd5tov3S2C/ZFlKkpWtYDQYs3QJ/ns1aek+FOqDMp4bM7PB4Fc7JxcydBu4MYYFussGi7uH3re//JwtdOCynQBB6KdW+TjGKWb3sFAQuHCzn9CRgv4Vpt75FwktVwQ2ZJedPYL34vke1mmwqXr+FYlgjkuVxNByWjLmlfiEThJ+EoYpUSNictWsP2gYwRh9TE1QL3xiRmKleaVKqYSimBK+lwjuDef4OKLyuORcKcEMlrTiw4EzQ4lQnAlOFFGCGmqkbvp+x40+GPUhXDJJWfWpeGktL+OHva3+u+ff1lpNXvBjFz9NwKUN8+xSDG+z77O93lKcoVyb5T7n7mWfCB42LbuQasKVoUprLQ2hpXwBinSX+A==';
+      const input = fs.readFileSync('test/test_data/locomotive_with_schedulte.txt', 'utf8');
       const bp = new Blueprint(input);
       assert.equal(bp.schedules.length, 1);
       assert.equal(bp.schedules[0].schedule.length, 1);
       assert.equal(bp.schedules[0].schedule[0].station, '[item=iron-plate]drop');
       const str = bp.encode();
       assert.equal(util.decode[0](str).schedules, util.decode[0](input).schedules);
+    });
+    it('schedule should stay valid after change', () => {
+      const input = fs.readFileSync('test/test_data/locomotive_with_schedulte.txt', 'utf8');
+      const bp = new Blueprint(input);
+      assert.equal(bp.schedules[0].getData().locomotives[0], 2);
+      const succes = bp.removeEntityAtPosition({ x: 0, y: 4 });
+      assert.notEqual(succes, false);
+      const str = bp.encode();
+      const bp2 = new Blueprint(str);
+      // locomotive index should be changed because entity number was changed:
+      assert.equal(bp2.schedules[0].getData().locomotives[0], 1);
+      // To be sure, open this blueprint in Factorio and check it the train still has it's schedule
+      console.log(str)
     });
   });
   describe('snapping', () => {

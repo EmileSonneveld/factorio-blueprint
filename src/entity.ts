@@ -43,6 +43,7 @@ interface AlertParameters {
 export default class Entity {
   id: number;
   bp: Blueprint;
+  // color: {} TODO: for train
   name: string;
   position: Victor;
   direction: number;
@@ -86,7 +87,7 @@ export default class Entity {
       entityData[bp.checkName(data.name)] = {};
     let myData = entityData[bp.checkName(data.name)]; // entityData contains info like width, height, filterAmount, etc
 
-    this.id = -1; // Id used when generating blueprint
+    this.id = data.entity_number; // Keep number to be able to find this entity
     this.bp = bp; // Blueprint
     this.name = this.bp.checkName(data.name); // Name or "type"
     this.position = Victor.fromObject(data.position); // Position of top left corner
@@ -158,8 +159,8 @@ export default class Entity {
         .subtract(this.size.clone().divide(new Victor(2, 2)));
     }
     this.position = new Victor(
-      Math.round(this.position.x * 100) / 100,
-      Math.round(this.position.y * 100) / 100,
+      Math.round(this.position.x * 1000000) / 1000000,
+      Math.round(this.position.y * 1000000) / 1000000,
     );
   }
 
@@ -944,7 +945,7 @@ export default class Entity {
             )
           : undefined,
 
-      neighbours: this.neighbours.map((ent) => ent.id),
+      neighbours: this.neighbours.length ? this.neighbours.map((ent) => ent.id) : undefined,
       parameters: this.parameters
         ? {
             playback_volume: useValueOrDefault(this.parameters.volume, 1.0),

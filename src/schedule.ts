@@ -1,4 +1,5 @@
 import Blueprint from './index';
+import Entity from './entity';
 
 class WaitCondition {
   compare_type: string;
@@ -35,19 +36,24 @@ class Schedule {
 }
 
 export default class ScheduleWrapper {
-  locomotives: number[];
+  locomotives: Entity[];
   schedule: Schedule[];
   bp: Blueprint;
 
   constructor(data: any, bp: Blueprint) {
     this.bp = bp;
-    this.locomotives = data.locomotives;
-    this.schedule = (data.schedule || []).map(x => new Schedule(x));
+    this.locomotives = data.locomotives.map(l => {
+      const entity = bp.entities.find(e => e.id == l)
+      if (entity == null) throw Error("Could not find entity for index: " + l);
+      if (entity.name !== "locomotive") throw Error("Entity should be a locomotive: " + entity)
+      return entity
+    });
+      this.schedule = (data.schedule || []).map(x => new Schedule(x));
   }
 
   getData() {
     return {
-      'locomotives': this.locomotives, // todo fix IDs
+      'locomotives': this.locomotives.map(l => l.id),
       'schedule': this.schedule.map(x => x.getData()),
     };
   }
